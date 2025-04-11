@@ -1,25 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Simple Webpage</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header>
-        <h1></h1>
-    </header>
+const express = require('express');
+const mongoose = require('mongoose');
+const multer = require('multer');
+const cors = require('cors');
+const { spawn } = require('child_process');
+const FoodLog = require('./model/foodLog');
+const nutritionData = require('./utils/nutritionDatabase.json');
 
-    <main>
-        <p>This is a simple webpage created using Visual Studio Code.</p>
-        <button id="clickMeButton">Click Me!</button>
-    </main>
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-    <footer>
-        <p>Created by [Your Name]</p>
-    </footer>
+mongoose.connect('mongodb://localhost:27017/foodTracker', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
-    <script src="script.js"></script>
-</body>
-</html>
+// Multer config
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+app.post('/api/track-food', upload.single('image'), async (req, res) => {
+  const imageBuffer = req.file.buffer;
+// server.js const express = require('express'); const mongoose = require('mongoose'); const multer = require('multer'); const cors = require('cors'); const { spawn } = require('child_process'); const FoodLog = require('./model/foodLog'); const nutritionData = require('./utils/nutritionDatabase.json');
+
+const app = express(); app.use(cors()); app.use(express.json());
+
+mongoose.connect('mongodb://localhost:27017/foodTracker', { useNewUrlParser: true, useUnifiedTopology: true, });
+
+const storage = multer.memoryStorage(); const upload = multer({ storage });
+
+app.post('/api/track-food', upload.single('image'), async (req, res) => { const imageBuffer = req.file.buffer;
+
+const python = spawn('python3', ['python/predict.py']); let result = '';
+
+python.stdin.write(imageBuffer); python.stdin.end();
+
+python.stdout.on('data', (data) => { result += data.toString(); });
+
+python.stderr.on('data', (data) => { console.error(Python error: ${data}); });
+
+python.on('close', async () => { const foodItems = JSON.parse(result); const nutritionResult = foodItems.map((item) => { const foodInfo = nutritionData[item.name.toLowerCase()] || {}; return { name: item.name, ...foodInfo, quantity: item.quantity || '1 serving', }; });
+
+const log = new FoodLog({
+  userId: 'demo-user', // Replace with real user auth if needed
+  items: nutritionResult,
+  createdAt: new Date(),
+});
+
+await log.save();
+res.json({ success: true, data: nutritionResult });
+
+}); });
+
+app.get('/api/logs', async (req, res) => { const logs = await FoodLog.find({ userId: 'demo-user' }).sort({ createdAt: -1 }); res.json(logs); });
+
+const PORT = 5000; app.listen(PORT, () => console.log(Server running on port ${PORT}));// server.js const express = require('express'); const mongoose = require('mongoose'); const multer = require('multer'); const cors = require('cors'); const { spawn } = require('child_process'); const FoodLog = require('./model/foodLog'); const nutritionData = require('./utils/nutritionDatabase.json');
+
+const app = express(); app.use(cors()); app.use(express.json());
+
+mongoose.connect('mongodb://localhost:27017/foodTracker', { useNewUrlParser: true, useUnifiedTopology: true, });
+
+const storage = multer.memoryStorage(); const upload = multer({ storage });
+
+app.post('/api/track-food', upload.single('image'), async (req, res) => { const imageBuffer = req.file.buffer;
+
+const python = spawn('python3', ['python/predict.py']); let result = '';
+
+python.stdin.write(imageBuffer); python.stdin.end();
+
+python.stdout.on('data', (data) => { result += data.toString(); });
+
+python.stderr.on('data', (data) => { console.error(Python error: ${data}); });
+
+python.on('close', async () => { const foodItems = JSON.parse(result); const nutritionResult = foodItems.map((item) => { const foodInfo = nutritionData[item.name.toLowerCase()] || {}; return { name: item.name, ...foodInfo, quantity: item.quantity || '1 serving', }; });
+
+const log = new FoodLog({
+  userId: 'demo-user', // Replace with real user auth if needed
+  items: nutritionResult,
+  createdAt: new Date(),
+});
+
+await log.save();
+res.json({ success: true, data: nutritionResult });
+
+}); });
+
+app.get('/api/logs', async (req, res) => { const logs = await FoodLog.find({ userId: 'demo-user' }).sort({ createdAt: -1 }); res.json(logs); });
+
+const PORT = 5000; app.listen(PORT, () => console.log(Server running on port ${PORT}));
+
+// model/foodLog.js const mongooseModel = require('mongoose');
+
+const FoodLogSchema = new mongooseModel.Schema({ userId: String, items: [ { name: String, calories: Number, protein: Number, carbohydrates: Number, fat: Number, quantity: String, }, ], createdAt: Date, });
+
+module.exports = mongooseModel.model('FoodLog', FoodLogSchema);
+
+// utils/nutritionDatabase.json /* { "apple": { "calories": 95, "protein": 0.5, "carbohydrates": 25, "fat": 0.3 }, "banana": { "calories": 105, "protein": 1.3, "carbohydrates": 27, "fat": 0.3 }, "rice": { "calories": 206, "protein": 4.3, "carbohydrates": 45, "fat": 0.4 }, "chicken": { "calories": 335, "protein": 27, "carbohydrates": 0, "fat": 20 }, "egg": { "calories": 78, "protein": 6, "carbohydrates": 0.6, "fat": 5 } } */
+
+// python/predict.py import sys import json
+
+For demonstration, returns mock data
+
+Replace with real YOLO model detection output
+
+result = [ {"name": "apple", "quantity": 1}, {"name": "rice", "quantity": 1}, {"name": "chicken", "quantity": 1} ]
+
+print(json.dumps(result))
